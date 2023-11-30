@@ -5,8 +5,10 @@
 #include <cstdint>
 #include <vector>
 #include <array>
+#include <algorithm>
 
 #include "simplified_solver.h"
+#include "grid_converter.h"
 
 class LowerBoundTables {
 public:
@@ -15,82 +17,29 @@ public:
         generateTables();
     }
 
+    unsigned int lower_bound(uint64_t tileLocations) {
+        unsigned int lb = 0;
+        for(unsigned int i = 0; i < tables.size(); i++) {
+            lb = std::max(lb, tables[i][tileLocations & masks[i]]);
+        }
+        return lb;
+    }
+
     void generateTables() {
-        std::vector<unsigned int> values({1, 2, 3, 4});
-        h[0] = bulkSolve(values);
-        first_unused_h[0] = find_first_unused(values);
-
-        values = {5, 6, 7, 8};
-        h[1] = bulkSolve(values);
-        first_unused_h[1] = find_first_unused(values);
-
-        values = {9, 10, 11, 12};
-        h[2] = bulkSolve(values);
-        first_unused_h[2] = find_first_unused(values);
-
-
-
-        values = {1, 5, 9, 13};
-        v[0] = bulkSolve(values);
-        first_unused_v[0] = find_first_unused(values);
-
-        values = {2, 6, 10, 14};
-        v[1] = bulkSolve(values);
-        first_unused_v[1] = find_first_unused(values);
-
-        values = {3, 7, 11, 15};
-        v[2] = bulkSolve(values);
-        first_unused_v[2] = find_first_unused(values);
-
-
-        values = {11, 12, 13, 14, 15};
-        //values = {4, 8, 11};
-        e[0] = bulkSolve(values);
-        first_unused_e[0] = find_first_unused(values);
-
-        values = {4, 8, 11, 12, 15};
-        //values = {4, 8, 11};
-        e[1] = bulkSolve(values);
-        first_unused_e[1] = find_first_unused(values);
-
-        values = {4, 8, 11, 13, 14, 15};
-        //values = {4, 8, 11};
-        e[2] = bulkSolve(values);
-        first_unused_e[2] = find_first_unused(values);
-    }
-
-    unsigned int get_first_unused_h(unsigned int index) const noexcept {
-        return first_unused_h[index];
-    }
-
-    unsigned int get_first_unused_v(unsigned int index) const noexcept {
-        return first_unused_v[index];
-    }
-
-    unsigned int get_first_unused_e(unsigned int index) const noexcept {
-        return first_unused_e[index];
-    }
-
-    int get_moves_h(uint64_t grid, unsigned int index) noexcept {
-        return h[index][grid];
-    }
-
-    int get_moves_v(uint64_t grid, unsigned int index) noexcept {
-        return v[index][grid];
-    }
-
-    int get_moves_e(uint64_t grid, unsigned int index) noexcept {
-        return e[index][grid];
+        populateTable(0, {1,  2,  3,  4});
+        populateTable(1, {5,  6,  7,  8});
+        populateTable(2, {9,  10, 11, 12});
+        populateTable(3, {1,  5,  9,  13});
+        populateTable(4, {2,  6,  10, 14});
+        populateTable(5, {3,  7,  11, 15});
+        populateTable(6, {11, 12, 13, 14, 15});
+        populateTable(7, {4,  8,  11, 12, 15});
+        populateTable(8, {4,  8,  11, 13, 14, 15});
     }
 
 private:
-    std::array<std::unordered_map<uint64_t, unsigned int>, 3> h;
-    std::array<std::unordered_map<uint64_t, unsigned int>, 3> v;
-    std::array<std::unordered_map<uint64_t, unsigned int>, 3> e;
-
-    std::array<unsigned int, 3> first_unused_h;
-    std::array<unsigned int, 3> first_unused_v;
-    std::array<unsigned int, 3> first_unused_e;
+    std::array<std::unordered_map<uint64_t, unsigned int>, 9> tables;
+    std::array<uint64_t, 9> masks;
 
     unsigned int find_first_unused(const std::vector<unsigned int> &values) {
         for(unsigned int i = 1; i < 16; i++) {
@@ -118,6 +67,22 @@ private:
             solved[value-1] = value;
         }
         return solver.solveFromEnd(100, solved);
+    }
+
+    void populateTable(unsigned int index, const std::vector<unsigned int> &values) {
+        masks[index] = createMask(values);
+        std::unordered_map<uint64_t, unsigned int> initialSolve = bulkSolve(values);
+        for(std::pair<uint64_t, unsigned int> solution : initialSolve) {
+            tables[index][gridToTileLocations(solution.first) & masks[index]] = solution.second;
+        }
+    }
+
+    uint64_t createMask(std::vector<unsigned int> values) {
+        uint64_t mask = 0xfULL;
+        for(const unsigned int &value : values) {
+            mask |= 0xfULL << value*4;
+        }
+        return mask;
     }
 
     void debugPrint(uint64_t x) const noexcept {

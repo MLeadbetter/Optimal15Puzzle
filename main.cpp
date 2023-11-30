@@ -26,15 +26,11 @@ struct Node {
     Solution solution;
 };
 
-bool operator < (Node const& a, Node const& b) {
-    return a.grid.manhattan() + a.solution.length() > b.grid.manhattan() + b.solution.length();
-}
-
 struct SolveInfo {
     MinBucketStack<Node> queue;
-    Uint64HashSet seen;
+    Uint64HashSet seen; // TODO: Not valid! This NEEDS to be a map.
     std::unordered_map<uint64_t, std::string> endSolutions;
-    int upperBound = numeric_limits<int>::max();
+    unsigned int upperBound = numeric_limits<int>::max();
     std::string bestSolution;
 };
 
@@ -44,7 +40,7 @@ bool moveNode(SolveInfo &info, Node node) {
     nodesExplored++;
     uint64_t grid = node.grid.getGrid();
     if(info.seen.contains(grid)) return false;
-    int cost = node.grid.lower_bound();
+    unsigned int cost = node.grid.lower_bound();
     //if(!info.endSolutions.contains(grid)) cost = max(cost, 22+1);
     if(cost == 0) {
         cout << node.solution.getString() << endl;
@@ -55,7 +51,7 @@ bool moveNode(SolveInfo &info, Node node) {
     cost += node.solution.length();
     if(info.endSolutions.contains(grid)) {
         string endSolution = info.endSolutions[grid];
-        int solutionLength = node.solution.length() + endSolution.length();
+        unsigned int solutionLength = node.solution.length() + endSolution.length();
         if(info.upperBound > solutionLength) {
             cout << "Improved upper bound to: " << solutionLength << endl;
             info.upperBound = solutionLength;
@@ -80,7 +76,7 @@ void bucketSolve(Grid grid) {
     static constexpr unsigned int BACK_MOVES = 22;
     Node node;
     node.grid = grid;
-    int solutionMoves = node.solution.length() + node.grid.lower_bound();
+    unsigned int solutionMoves = node.solution.length() + node.grid.lower_bound();
     unsigned int longestExploration = node.solution.length();
     SolveInfo info;
     BackwardsSolver solver;
@@ -89,14 +85,13 @@ void bucketSolve(Grid grid) {
     bool done = false;
     while(!done && !info.queue.empty()) {
         node = info.queue.top();
-        int estimatedMoves = node.solution.length() + node.grid.lower_bound();
+        unsigned int estimatedMoves = node.solution.length() + node.grid.lower_bound();
         if(estimatedMoves >= info.upperBound) {
             cout << "Lower bound met upper bound." << endl;
             break;
         }
         if(estimatedMoves > solutionMoves) {
             cout << "Checking for " << estimatedMoves << " move length solutions." << endl;
-            //info.seen.improveLowerBound(estimatedMoves);
             solutionMoves = estimatedMoves;
         }
         if(node.solution.length() > longestExploration) {
@@ -109,7 +104,7 @@ void bucketSolve(Grid grid) {
         if(!info.endSolutions.contains(grid.getGrid()) && static_cast<unsigned int>(info.upperBound) <= node.solution.length() + BACK_MOVES)
             continue;
         int blankLoc = node.grid.getBlankLoc();
-        //cout << node.solution.getString() << endl;
+
         if(node.grid.upValid(blankLoc))
         {
             Node node2(node);
@@ -276,7 +271,7 @@ void numberphile() {
 }
 
 int main() {
-    solve_worst1();
+    solve_worst2();
     //solve_last_layers5();
     //solve_sample1();
     //numberphile();
