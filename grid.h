@@ -105,7 +105,7 @@ public:
     }
 
     int find(int tile) const noexcept {
-        return (tileLocations >> tile) & 0xfULL;
+        return (tileLocations >> tile*4) & 0xfULL;
     }
 
     void debugPrint() const noexcept {

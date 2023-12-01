@@ -12,7 +12,7 @@
 
 #include "bucket_queue.h"
 #include "solver.h"
-#include "uint64_hash_set.h"
+#include "uint64_hash_map.h"
 #include "solution.h"
 #include "grid.h"
 #include "lower_bound_tables.h"
@@ -28,7 +28,7 @@ struct Node {
 
 struct SolveInfo {
     MinBucketStack<Node> queue;
-    Uint64HashSet seen; // TODO: Not valid! This NEEDS to be a map.
+    Uint64HashMap seen;
     std::unordered_map<uint64_t, std::string> endSolutions;
     unsigned int upperBound = numeric_limits<int>::max();
     std::string bestSolution;
@@ -39,9 +39,7 @@ unsigned int nodesExplored = 0;
 bool moveNode(SolveInfo &info, Node node) {
     nodesExplored++;
     uint64_t grid = node.grid.getGrid();
-    if(info.seen.contains(grid)) return false;
     unsigned int cost = node.grid.lower_bound();
-    //if(!info.endSolutions.contains(grid)) cost = max(cost, 22+1);
     if(cost == 0) {
         cout << node.solution.getString() << endl;
         cout << "Explored: " << nodesExplored;
@@ -49,6 +47,15 @@ bool moveNode(SolveInfo &info, Node node) {
         return true;
     }
     cost += node.solution.length();
+
+    if(info.seen.contains(grid)) {
+        if(info.seen[grid] <= node.solution.length()) {
+            return false;
+        } else {
+            info.seen.insert(grid, node.solution.length());
+        }
+    }
+
     if(info.endSolutions.contains(grid)) {
         string endSolution = info.endSolutions[grid];
         unsigned int solutionLength = node.solution.length() + endSolution.length();
@@ -67,7 +74,7 @@ bool moveNode(SolveInfo &info, Node node) {
         }
     } else if(cost < info.upperBound) {
         info.queue.add(cost, node);
-        info.seen.insert(node.grid.getGrid());
+        info.seen.insert(node.grid.getGrid(), node.solution.length());
     }
     return false;
 }
@@ -271,9 +278,10 @@ void numberphile() {
 }
 
 int main() {
-    solve_worst2();
+    //solve_worst2();
     //solve_last_layers5();
     //solve_sample1();
+    solve_sample5();
     //numberphile();
 
     exit(0);

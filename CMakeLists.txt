@@ -29,6 +29,7 @@ set(SHARED_SOURCES
     ${CMAKE_SOURCE_DIR}/solution.h
     ${CMAKE_SOURCE_DIR}/lower_bound_tables.h
     ${CMAKE_SOURCE_DIR}/grid_converter.h
+    ${CMAKE_SOURCE_DIR}/uint64_hash_map.h
 
     ${CMAKE_SOURCE_DIR}/functions.cpp
 )
@@ -45,6 +46,7 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test_hash_set.cpp
     ${CMAKE_SOURCE_DIR}/test_solution.cpp
     ${CMAKE_SOURCE_DIR}/test_grid_converter.cpp
+    ${CMAKE_SOURCE_DIR}/test_hash_map.cpp
     ${SHARED_SOURCES}
 )
 
