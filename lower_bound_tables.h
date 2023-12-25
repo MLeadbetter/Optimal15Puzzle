@@ -32,9 +32,9 @@ public:
         populateTable(3, {1,  5,  9,  13});
         populateTable(4, {2,  6,  10, 14});
         populateTable(5, {3,  7,  11, 15});
-        populateTable(6, {11, 12, 13, 14, 15});
+        /*populateTable(6, {11, 12, 13, 14, 15});
         populateTable(7, {4,  8,  11, 12, 15});
-        populateTable(8, {4,  8,  11, 13, 14, 15});
+        populateTable(8, {4,  8,  11, 13, 14, 15});*/
     }
 
 private:

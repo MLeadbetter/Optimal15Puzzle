@@ -16,8 +16,8 @@ FetchContent_MakeAvailable(googletest)
 
 
 # Configure project
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -O3 -march=native -flto")
-#set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -g")
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -O3 -march=native -flto")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -g")
 
 set(SHARED_SOURCES
     ${CMAKE_SOURCE_DIR}/grid.h
@@ -25,11 +25,14 @@ set(SHARED_SOURCES
     ${CMAKE_SOURCE_DIR}/solver.h
     ${CMAKE_SOURCE_DIR}/simplified_solver.h
     ${CMAKE_SOURCE_DIR}/bucket_queue.h
-    ${CMAKE_SOURCE_DIR}/uint64_hash_set.h
     ${CMAKE_SOURCE_DIR}/solution.h
     ${CMAKE_SOURCE_DIR}/lower_bound_tables.h
     ${CMAKE_SOURCE_DIR}/grid_converter.h
+    ${CMAKE_SOURCE_DIR}/uint64_hash_set.h
     ${CMAKE_SOURCE_DIR}/uint64_hash_map.h
+    ${CMAKE_SOURCE_DIR}/linked_hash_map.h
+    ${CMAKE_SOURCE_DIR}/fsm.h
+    ${CMAKE_SOURCE_DIR}/quarternarytree.h
 
     ${CMAKE_SOURCE_DIR}/functions.cpp
 )
@@ -43,10 +46,13 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test_grid.cpp
     ${CMAKE_SOURCE_DIR}/test_bucket_queue.cpp
     ${CMAKE_SOURCE_DIR}/test_solver.cpp
-    ${CMAKE_SOURCE_DIR}/test_hash_set.cpp
     ${CMAKE_SOURCE_DIR}/test_solution.cpp
     ${CMAKE_SOURCE_DIR}/test_grid_converter.cpp
+    ${CMAKE_SOURCE_DIR}/test_hash_set.cpp
     ${CMAKE_SOURCE_DIR}/test_hash_map.cpp
+    ${CMAKE_SOURCE_DIR}/test_linked_hash_map.cpp
+    ${CMAKE_SOURCE_DIR}/test_quarternerytree.cpp
+    ${CMAKE_SOURCE_DIR}/test_fsm.cpp
     ${SHARED_SOURCES}
 )
 
@@ -55,6 +61,8 @@ include_directories(
 )
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+
+add_executable(generate_tables generate_tables.cpp ${SHARED_SOURCES})
 
 add_executable(test_${PROJECT_NAME} ${TEST_SOURCES})
 target_link_libraries(test_${PROJECT_NAME} gtest_main)

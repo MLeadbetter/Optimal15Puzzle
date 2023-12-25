@@ -27,8 +27,8 @@ public:
         return table1[hash1(key)<<1]==key || table2[hash2(key)<<1]==key || table3[hash3(key)<<1]==key;
     }
 
-    unsigned long operator [](uint64_t key) const {return get(key);}
-    //unsigned long &operator [](uint64_t key) {return registers[i];}
+    uint64_t operator [](uint64_t key) const {return get(key);}
+    //uint64_t &operator [](uint64_t key) {return registers[i];}
 
     uint64_t get(uint64_t key) const noexcept {
         uint64_t h = hash1(key)<<1;
@@ -58,7 +58,7 @@ private:
         m++;
         uint64_t size = 1ULL << (m+1);
         updateMask();
-        _capacity = size | (size << 1); // Times 3
+        _capacity = size * 3;
         uint64_t* tempTable1 = table1;
         uint64_t* tempTable2 = table2;
         uint64_t* tempTable3 = table3;
