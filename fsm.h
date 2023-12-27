@@ -44,29 +44,25 @@ public:
         unsigned int traversalId = 0;
         TraversalHashMap hashMap;
         std::stack<TreeTraversalNode*> nodes;
-        TreeTraversalNode* traversal = new TreeTraversalNode;
-        traversal->setTree(&tree);
+        TreeTraversalNode* traversal = new TreeTraversalNode(&tree);
         traversal->moveUp();
         traversal->id = traversalId;
         hashMap.insert(traversal, traversal->id);
         traversalId++;
         nodes.push(traversal);
-        traversal = new TreeTraversalNode;
-        traversal->setTree(&tree);
+        traversal = new TreeTraversalNode(&tree);
         traversal->moveDown();
         traversal->id = traversalId;
         traversalId++;
         hashMap.insert(traversal, traversal->id);
         nodes.push(traversal);
-        traversal = new TreeTraversalNode;
-        traversal->setTree(&tree);
+        traversal = new TreeTraversalNode(&tree);
         traversal->moveLeft();
         traversal->id = traversalId;
         traversalId++;
         hashMap.insert(traversal, traversal->id);
         nodes.push(traversal);
-        traversal = new TreeTraversalNode;
-        traversal->setTree(&tree);
+        traversal = new TreeTraversalNode(&tree);
         traversal->moveRight();
         traversal->id = traversalId;
         traversalId++;
@@ -113,6 +109,7 @@ public:
                 newNode->moveLeft();
                 if(hashMap.contains(newNode)) {
                     fsm[toExpand->id].left = hashMap.get(newNode);
+                    delete newNode;
                 } else {
                     newNode->id = traversalId;
                     traversalId++;
@@ -128,6 +125,7 @@ public:
                 newNode->moveRight();
                 if(hashMap.contains(newNode)) {
                     fsm[toExpand->id].right = hashMap.get(newNode);
+                    delete newNode;
                 } else {
                     newNode->id = traversalId;
                     traversalId++;

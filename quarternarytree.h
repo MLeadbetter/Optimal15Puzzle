@@ -3,43 +3,10 @@
 
 #include <memory>
 #include <algorithm>
-#include <deque>
 #include <array>
+#include <stack>
 #include <cmath>
-
-template<class T>
-class CircularQueue {
-public:
-    CircularQueue() {
-        data = new T[size]{0};
-    }
-
-    ~CircularQueue() {
-        delete[] data;
-    }
-
-    void reinit() noexcept {
-        delete[] data;
-        data = new T[size]{0};
-    }
-
-    void addStartPopEnd(T val) noexcept {
-        pos = (pos+1) % size;
-        data[pos] = val;
-    }
-
-    T* getRaw() const noexcept {
-        return data;
-    }
-
-    T operator [](unsigned int index) const noexcept {return data[(pos+index)%size];}
-    T &operator [](unsigned int index) noexcept {return data[(pos+index)%size];}
-
-private:
-    T* data;
-    unsigned int pos = 0;
-    unsigned int size = 0;
-};
+#include <bit>
 
 struct QuarternaryTreeNode {
     QuarternaryTreeNode* u = 0;
@@ -98,6 +65,20 @@ public:
         }
     }
 
+    virtual ~QuarternaryTree() {
+        std::stack<QuarternaryTreeNode*> nodes;
+        nodes.push(&head);
+        while(!nodes.empty()) {
+            QuarternaryTreeNode* current = nodes.top();
+            nodes.pop();
+            if(current->u) nodes.push(current->u);
+            if(current->d) nodes.push(current->d);
+            if(current->l) nodes.push(current->l);
+            if(current->r) nodes.push(current->r);
+            if(current != &head) delete current;
+        }
+    }
+
     bool superceeded(std::string s) {
         for(unsigned int i = 0; i < s.length()-1; i++) {
             QuarternaryTreeNode* current = &head;
@@ -134,6 +115,71 @@ public:
     unsigned long getMaxDepth() {
         return maxDepth;
     }
+};
+#include <iostream>
+class CircularQueue {
+public:
+    CircularQueue(unsigned int size) : _size(size) {
+        data = new QuarternaryTreeNode*[size]{0};
+    }
+
+    /*CircularQueue(const CircularQueue &c) :_size(c._size) {
+        data = new QuarternaryTreeNode*[_size]{0};
+        for(unsigned int i = 0; i < _size; i++) {
+            data[i] = c.data[i];
+            pos = c.pos;
+        }
+    }
+
+    CircularQueue& operator=(const CircularQueue &c) {
+        //data = new QuarternaryTreeNode*[_size]{0};
+        for(unsigned int i = 0; i < _size; i++) {
+            data[i] = c.data[i];
+            pos = c.pos;
+        }
+        return *this;
+    }*/
+
+    ~CircularQueue() {
+        delete[] data;
+    }
+
+    void reinit() noexcept {
+        delete[] data;
+        data = new QuarternaryTreeNode*[_size]{0};
+    }
+
+    void setData(QuarternaryTreeNode** newData, unsigned int pos) noexcept {
+        for(unsigned int i = 0; i < _size; i++) {
+            data[i] = newData[i];
+        }
+        this->pos = pos;
+    }
+
+    unsigned int getPos() const noexcept {
+        return pos;
+    }
+
+    void addStartPopEnd(QuarternaryTreeNode* val) noexcept {
+        pos = (pos+_size-1) % _size;
+        data[pos] = val;
+    }
+
+    QuarternaryTreeNode** getRaw() const noexcept {
+        return data;
+    }
+
+    unsigned int size() const noexcept {
+        return _size;
+    }
+
+    QuarternaryTreeNode* operator [](unsigned int index) const noexcept {return data[(pos+index)%_size];}
+    QuarternaryTreeNode* &operator [](unsigned int index) noexcept {return data[(pos+index)%_size];}
+
+private:
+    QuarternaryTreeNode** data;
+    unsigned int pos = 1;
+    const unsigned int _size;
 };
 
 struct TreeTraversalNode {
@@ -179,89 +225,75 @@ public:
                                               1163, 1171, 1181, 1187, 1193,
                                               1201, 1213, 1217, 1223};
 
-    TreeTraversalNode() noexcept {}
+    static constexpr uint64_t primes2[]= {8400258977915390269ULL, 2651797441646065907ULL, 6485979681404405279ULL, 3399748860715184603ULL, 1275563148975948439ULL, 1275297488069249299ULL, 7860230888069455397ULL, 2993206844973573517ULL, 8382784540840949143ULL, 9267892822377177097ULL, 1168209292105888603ULL, 8183573410020441497ULL, 6185599539222423587ULL, 2356655709923141171ULL, 4487197072724967677ULL, 4781190765361296571ULL, 5279433610146807607ULL, 7897838741589597709ULL, 7076813857959433433ULL, 5326752869356981147ULL, 3586956073107489619ULL, 8872249270157779393ULL, 1942918662158584499ULL, 4067068890185269721ULL, 5671876708415451383ULL, 4812559778928314887ULL, 9654134999216276887ULL, 1208356955578222649ULL, 3629259048085269617ULL, 1146018678250844813ULL, 6616289894318405759ULL, 4251238325797481287ULL, 4563097568433622051ULL, 6487136592424400251ULL, 7206629461388892481ULL, 8149425579402935257ULL, 1708841473982518021ULL, 4477103760837165673ULL, 3955041634548512009ULL, 1814718795727399171ULL, 6736286652801120641ULL, 3440918648485120867ULL, 1178085811014202003ULL, 6409794909270965881ULL, 5674571425963490587ULL, 8503549932689185783ULL, 2870108303125622249ULL, 8166447337332708163ULL, 1808490791262827449ULL, 4768938432786421727ULL, 9943839582558052337ULL, 3820487317648082491ULL, 8813266707171359267ULL, 4061779618751475031ULL, 8693795364898594583ULL, 4758572949676498637ULL, 5533099753543305547ULL, 7249349253118374527ULL, 1507138902681555973ULL, 9631022480814455113ULL, 1273233659649375079ULL, 9368360816590980359ULL, 5043139390005874403ULL, 7984230445317223777ULL, 9600814179808709393ULL, 9347284875993649231ULL, 8815927017081012749ULL, 3294115622239180709ULL, 2746299196805350861ULL, 8125774468285036553ULL, 9739805701535896123ULL, 2082351095429950349ULL, 5155563119192308541ULL, 6930991917973614461ULL, 2250356340797193371ULL, 1593901110788350451ULL, 3262135988014002833ULL, 5030019825744950089ULL, 1437754360263987547ULL, 2305891990685721101ULL, 6865090266781889297ULL, 7069688648212460033ULL, 6072878647569060037ULL, 1303002385798111919ULL, 3411077213703622847ULL, 3812250525966924337ULL, 2724195237945537683ULL, 8136481884682153237ULL, 8359926488000406629ULL, 2544725808509826607ULL, 2720526517323445837ULL, 9382348298438955989ULL, 2174727428678912309ULL, 2176470240814777451ULL, 4284731490491457073ULL, 3161189890048474859ULL, 9770060200401016459ULL, 3657079457763299441ULL, 8112040393832986021ULL, 2579989519811387371ULL, 7707551629243020949ULL, 4718928810188440223ULL, 9195944040795170497ULL, 2275684215253345769ULL, 3709467574578267431ULL};
+    //TreeTraversalNode() noexcept {}
 
-    TreeTraversalNode(QuarternaryTree* tree) noexcept {
-        setTree(tree);
-    }
-
-    void setTree(QuarternaryTree* tree) noexcept {
-        state.resize(tree->getMaxDepth(), 0);
-        this->tree = tree;
-    }
+    TreeTraversalNode(QuarternaryTree* tree) : tree(tree), state(tree->getMaxDepth()) {}
 
     void moveUp() noexcept {
         for(unsigned int i = 0; i < state.size(); i++) {
             if(state[i] != 0) state[i] = state[i]->u;
         }
-        state.push_front(tree->getHead()->u);
-        state.pop_back();
+        state.addStartPopEnd(tree->getHead()->u);
     }
 
     void moveDown() noexcept {
         for(unsigned int i = 0; i < state.size(); i++) {
             if(state[i] != 0) state[i] = state[i]->d;
         }
-        state.push_front(tree->getHead()->d);
-        state.pop_back();
+        state.addStartPopEnd(tree->getHead()->d);
     }
 
     void moveLeft() noexcept {
         for(unsigned int i = 0; i < state.size(); i++) {
             if(state[i] != 0) state[i] = state[i]->l;
         }
-        state.push_front(tree->getHead()->l);
-        state.pop_back();
+        state.addStartPopEnd(tree->getHead()->l);
     }
 
     void moveRight() noexcept {
         for(unsigned int i = 0; i < state.size(); i++) {
             if(state[i] != 0) state[i] = state[i]->r;
         }
-        state.push_front(tree->getHead()->r);
-        state.pop_back();
+        state.addStartPopEnd(tree->getHead()->r);
     }
 
     bool upValid() const noexcept {
-        for(QuarternaryTreeNode* const s : state) {
-            if(s != 0 && s->u != 0 && !s->u->isParent) return false;
+        for(unsigned int i = 0; i < state.size(); i++) {
+            if(state[i] != 0 && state[i]->u != 0 && !state[i]->u->isParent) return false;
         }
         return true;
     }
 
     bool downValid() const noexcept {
-        for(QuarternaryTreeNode* const s : state) {
-            if(s != 0 && s->d != 0 && !s->d->isParent) return false;
+        for(unsigned int i = 0; i < state.size(); i++) {
+            if(state[i] != 0 && state[i]->d != 0 && !state[i]->d->isParent) return false;
         }
         return true;
     }
 
     bool leftValid() const noexcept {
-        for(QuarternaryTreeNode* const s : state) {
-            if(s != 0 && s->l != 0 && !s->l->isParent) return false;
+        for(unsigned int i = 0; i < state.size(); i++) {
+            if(state[i] != 0 && state[i]->l != 0 && !state[i]->l->isParent) return false;
         }
         return true;
     }
 
     bool rightValid() const noexcept {
-        for(QuarternaryTreeNode* const s : state) {
-            if(s != 0 && s->r != 0 && !s->r->isParent) return false;
+        for(unsigned int i = 0; i < state.size(); i++) {
+            if(state[i] != 0 && state[i]->r != 0 && !state[i]->r->isParent) return false;
         }
         return true;
     }
 
-    int ipow(uint64_t base, uint64_t exp) const noexcept {
-        int result = 1;
+    uint64_t ipow(uint64_t base, uint64_t exp) const noexcept {
+        uint64_t result = 1;
         while(true) {
-            if (exp & 1)
-                result *= base;
+            if (exp & 1) result *= base;
             exp >>= 1;
-            if (!exp)
-                break;
+            if (!exp) return result;
             base *= base;
         }
-
-        return result;
     }
 
     uint64_t hash(unsigned int p) const noexcept {
@@ -282,10 +314,9 @@ public:
     }
 
     TreeTraversalNode* clone() const noexcept {
-        TreeTraversalNode* c = new TreeTraversalNode;
+        TreeTraversalNode* c = new TreeTraversalNode(tree);
         c->id = id;
-        c->state = state;
-        c->tree = tree;
+        c->state.setData(state.getRaw(), state.getPos());
         return c;
     }
 
@@ -296,8 +327,8 @@ public:
     int id;
 
 private:
-    std::deque<QuarternaryTreeNode*> state;
     QuarternaryTree *tree;
+    CircularQueue state;
 };
 
 struct HashNode {
@@ -306,7 +337,7 @@ struct HashNode {
     TreeTraversalNode *key;
     uint64_t value;
 };
-
+#include <iostream>
 class TraversalHashMap {
 public:
     TraversalHashMap(unsigned int m=20) : m(m), elements(0) {
@@ -375,6 +406,7 @@ public:
 
 private:
     void doubleTable() noexcept {
+        std::cout << "Doubling" << std::endl;
         m++;
         uint64_t size = 1ULL << m;
         updateMask();
@@ -393,6 +425,7 @@ private:
         delete[] tempTable1;
         delete[] tempTable2;
         delete[] tempTable3;
+        std::cout << "Finished Doubling " << elements << ", " << _capacity << std::endl;
     }
 
     // Returns 0 on success, and 1 on failure
@@ -430,11 +463,11 @@ private:
     }
 
     uint64_t hash2(const TreeTraversalNode *value) const noexcept {
-        return value->hash(5);
+        return value->hash(20);
     }
 
     uint64_t hash3(const TreeTraversalNode *value) const noexcept {
-        return value->hash(10);
+        return value->hash(40);
     }
 
     void updateMask() noexcept {

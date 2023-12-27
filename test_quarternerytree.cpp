@@ -78,8 +78,7 @@ TEST(quarternary_tree, test_superceeded_end) {
 TEST(tree_traversal, test_simple_tree_move) {
     QuarternaryTree tree;
     tree.addString("u");
-    TreeTraversalNode traversal;
-    traversal.setTree(&tree);
+    TreeTraversalNode traversal(&tree);
     traversal.moveUp();
     EXPECT_EQ(3, traversal.hash(0));
 }
@@ -87,8 +86,7 @@ TEST(tree_traversal, test_simple_tree_move) {
 TEST(tree_traversal, test_simple_tree_hash) {
     QuarternaryTree tree;
     tree.addString("u");
-    TreeTraversalNode traversal;
-    traversal.setTree(&tree);
+    TreeTraversalNode traversal(&tree);
     traversal.moveUp();
     EXPECT_EQ(5, traversal.hash(1));
 }
@@ -96,8 +94,7 @@ TEST(tree_traversal, test_simple_tree_hash) {
 TEST(tree_traversal, test_compound) {
     QuarternaryTree tree;
     tree.addString("uu");
-    TreeTraversalNode traversal;
-    traversal.setTree(&tree);
+    TreeTraversalNode traversal(&tree);
     traversal.moveUp();
     traversal.moveUp();
     EXPECT_EQ(75, traversal.hash(0));
@@ -107,8 +104,7 @@ TEST(tree_traversal, test_expire_node) {
     QuarternaryTree tree;
     tree.addString("ur");
     tree.addString("ud");
-    TreeTraversalNode traversal;
-    traversal.setTree(&tree);
+    TreeTraversalNode traversal(&tree);
     traversal.moveUp();
     traversal.moveRight();
     EXPECT_EQ(25, traversal.hash(0));
@@ -118,12 +114,10 @@ TEST(tree_traversal, test_equal) {
     QuarternaryTree tree;
     tree.addString("ur");
     tree.addString("ud");
-    TreeTraversalNode traversal1;
-    traversal1.setTree(&tree);
+    TreeTraversalNode traversal1(&tree);
     traversal1.moveUp();
     traversal1.moveRight();
-    TreeTraversalNode traversal2;
-    traversal2.setTree(&tree);
+    TreeTraversalNode traversal2(&tree);
     traversal2.moveUp();
     traversal2.moveRight();
     EXPECT_TRUE(traversal1.equals(&traversal2));
@@ -133,12 +127,10 @@ TEST(tree_traversal, test_not_equal) {
     QuarternaryTree tree;
     tree.addString("ur");
     tree.addString("ud");
-    TreeTraversalNode traversal1;
-    traversal1.setTree(&tree);
+    TreeTraversalNode traversal1(&tree);
     traversal1.moveUp();
     traversal1.moveRight();
-    TreeTraversalNode traversal2;
-    traversal2.setTree(&tree);
+    TreeTraversalNode traversal2(&tree);
     traversal2.moveUp();
     EXPECT_FALSE(traversal1.equals(&traversal2));
 }
@@ -147,8 +139,7 @@ TEST(tree_traversal, test_valid) {
     QuarternaryTree tree;
     tree.addString("ud");
     tree.addString("du");
-    TreeTraversalNode traversal1;
-    traversal1.setTree(&tree);
+    TreeTraversalNode traversal1(&tree);
     traversal1.moveUp();
     EXPECT_FALSE(traversal1.downValid());
     traversal1.moveDown();
@@ -162,8 +153,7 @@ TEST(tree_traversal, test_valid_longer) {
     QuarternaryTree tree;
     tree.addString("udd");
     tree.addString("uuu");
-    TreeTraversalNode traversal1;
-    traversal1.setTree(&tree);
+    TreeTraversalNode traversal1(&tree);
     traversal1.moveUp();
     EXPECT_TRUE(traversal1.downValid());
     traversal1.moveDown();
@@ -175,8 +165,7 @@ TEST(traversal_hash_map, test_contains) {
     QuarternaryTree tree;
     tree.addString("ur");
     tree.addString("ud");
-    TreeTraversalNode* traversal = new TreeTraversalNode();
-    traversal->setTree(&tree);
+    TreeTraversalNode* traversal = new TreeTraversalNode(&tree);
     traversal->moveUp();
     traversal->moveRight();
     TraversalHashMap hashmap(4);
@@ -195,8 +184,7 @@ TEST(traversal_hash_map, test_get) {
     QuarternaryTree tree;
     tree.addString("ur");
     tree.addString("ud");
-    TreeTraversalNode* traversal = new TreeTraversalNode();
-    traversal->setTree(&tree);
+    TreeTraversalNode* traversal = new TreeTraversalNode(&tree);
     traversal->moveUp();
     traversal->moveRight();
     TraversalHashMap hashmap(4);
@@ -210,10 +198,49 @@ TEST(traversal_hash_map, test_resize) {
     TraversalHashMap hashmap(2);
     TreeTraversalNode* traversal;
     for(int i = 0; i < 7; i++) {
-        traversal = new TreeTraversalNode();
-        traversal->setTree(&tree);
+        traversal = new TreeTraversalNode(&tree);
         for(int j = 0; j < i+1; j++) traversal->moveUp();
         hashmap.insert(traversal, i);
     }
     EXPECT_EQ(6, hashmap.get(traversal));
+}
+
+TEST(circular_queue, test_in_out) {
+    CircularQueue queue(2);
+    QuarternaryTreeNode* n1 = new QuarternaryTreeNode;
+    n1->id = 1;
+    queue.addStartPopEnd(n1);
+    EXPECT_EQ(1, queue[0]->id);
+}
+
+#include <iostream>
+TEST(circular_queue, test_in_out_twice) {
+    CircularQueue queue(3);
+    QuarternaryTreeNode* n1 = new QuarternaryTreeNode;
+    n1->id = 1;
+    QuarternaryTreeNode* n2 = new QuarternaryTreeNode;
+    n2->id = 2;
+    queue.addStartPopEnd(n1);
+    queue.addStartPopEnd(n2);
+    EXPECT_EQ(2, queue[0]->id);
+    EXPECT_EQ(1, queue[1]->id);
+}
+
+TEST(circular_queue, test_pop_end) {
+    CircularQueue queue(2);
+    QuarternaryTreeNode* n1 = new QuarternaryTreeNode;
+    n1->id = 1;
+    QuarternaryTreeNode* n2 = new QuarternaryTreeNode;
+    n2->id = 2;
+    QuarternaryTreeNode* n3 = new QuarternaryTreeNode;
+    n3->id = 3;
+    queue.addStartPopEnd(n1);
+    queue.addStartPopEnd(n2);
+    queue.addStartPopEnd(n3);
+    queue.addStartPopEnd(n1);
+    queue.addStartPopEnd(n2);
+    queue.addStartPopEnd(n3);
+    cout << queue[0] << ", " << queue[1] << endl;
+    EXPECT_EQ(3, queue[0]->id);
+    EXPECT_EQ(2, queue[1]->id);
 }
