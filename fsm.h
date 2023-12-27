@@ -59,7 +59,6 @@ public:
         hashMap.insert(traversal, traversal->id);
         nodes.push(traversal);
         traversal = new TreeTraversalNode;
-        traversal->id = 0;
         traversal->setTree(&tree);
         traversal->moveLeft();
         traversal->id = traversalId;

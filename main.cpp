@@ -16,6 +16,7 @@
 #include "solution.h"
 #include "grid.h"
 #include "lower_bound_tables.h"
+#include "fsm.h"
 
 using namespace std;
 
@@ -29,13 +30,13 @@ LowerBoundTables lbt;
  * Last move (last move needs to be 15 tile left or 8 tile up. So if 15 tile is not on the right +1 and if the 8 tile is not on the bottom +1) NOT COMPATIBLE WITH BIDIRECTION SEARCH
  */
 
-struct QuarternaryTreeNode {
+struct TreeNode {
     Grid grid;
     Solution solution;
 };
 
 struct SolveInfo {
-    MinBucketStack<QuarternaryTreeNode> queue;
+    MinBucketStack<TreeNode> queue;
     Uint64HashMap seen;
     std::unordered_map<uint64_t, std::string> endSolutions;
     unsigned int upperBound = numeric_limits<int>::max();
@@ -44,7 +45,7 @@ struct SolveInfo {
 
 unsigned int nodesExplored = 0;
 
-bool moveNode(SolveInfo &info, QuarternaryTreeNode node) {
+bool moveNode(SolveInfo &info, TreeNode node) {
     nodesExplored++;
     uint64_t grid = node.grid.getGrid();
     unsigned int cost = node.grid.lower_bound();
@@ -89,7 +90,7 @@ bool moveNode(SolveInfo &info, QuarternaryTreeNode node) {
 
 void bucketSolve(Grid grid) {
     static constexpr unsigned int BACK_MOVES = 22;
-    QuarternaryTreeNode node;
+    TreeNode node;
     node.grid = grid;
     unsigned int solutionMoves = node.solution.length() + node.grid.lower_bound();
     unsigned int longestExploration = node.solution.length();
@@ -122,28 +123,28 @@ void bucketSolve(Grid grid) {
 
         if(node.grid.upValid(blankLoc))
         {
-            QuarternaryTreeNode node2(node);
+            TreeNode node2(node);
             node2.grid.moveUp(blankLoc);
             node2.solution.addDirection(UP);// += 'u';
             if(moveNode(info, node2)) break;
         }
         if(node.grid.downValid(blankLoc))
         {
-            QuarternaryTreeNode node2(node);
+            TreeNode node2(node);
             node2.grid.moveDown(blankLoc);
             node2.solution.addDirection(DOWN);// += 'd';
             if(moveNode(info, node2)) break;
         }
         if(node.grid.leftValid(blankLoc))
         {
-            QuarternaryTreeNode node2(node);
+            TreeNode node2(node);
             node2.grid.moveLeft(blankLoc);
             node2.solution.addDirection(LEFT);// += 'l';
             if(moveNode(info, node2)) break;
         }
         if(node.grid.rightValid(blankLoc))
         {
-            QuarternaryTreeNode node2(node);
+            TreeNode node2(node);
             node2.grid.moveRight(blankLoc);
             node2.solution.addDirection(RIGHT);// += 'r';
             if(moveNode(info, node2)) break;
@@ -155,13 +156,13 @@ void bucketSolve(Grid grid) {
     exit(0);
 }
 
-void writeSolution(QuarternaryTreeNode node) noexcept {
+void writeSolution(TreeNode node) noexcept {
     cout << "Solution: " << node.solution.getString() << endl;
     cout << "Moves: " << node.solution.length() << endl;
     cout << "Nodes explored: " << nodesExplored << endl;
 }
 
-bool checkNode(const QuarternaryTreeNode &node, stack<QuarternaryTreeNode> &nodes, const unsigned int threshold) noexcept {
+bool checkNode(const TreeNode &node, stack<TreeNode> &nodes, const unsigned int threshold) noexcept {
     nodesExplored++;
     if(node.grid.manhattan() == 0) {
         writeSolution(node);
@@ -175,19 +176,19 @@ void ida(Grid grid) noexcept {
     nodesExplored = 0;
     unsigned int threshold = grid.parity() | 2;
     bool done = false;
-    QuarternaryTreeNode first;
+    TreeNode first;
     first.grid = grid;
     while(!done) {
         cout << "Threshold: " << threshold << endl;
-        std::stack<QuarternaryTreeNode> nodes;
+        std::stack<TreeNode> nodes;
         nodes.push(first);
         while(!nodes.empty()) {
-            QuarternaryTreeNode node = nodes.top();
+            TreeNode node = nodes.top();
             nodes.pop();
             int blankLoc = node.grid.getBlankLoc();
             if(node.grid.upValid(blankLoc))
             {
-                QuarternaryTreeNode node2(node);
+                TreeNode node2(node);
                 node2.grid.moveUp(blankLoc);
                 node2.solution.addDirection(UP);// += 'u';
                 if(checkNode(node2, nodes, threshold)) {
@@ -197,7 +198,7 @@ void ida(Grid grid) noexcept {
             }
             if(node.grid.downValid(blankLoc))
             {
-                QuarternaryTreeNode node2(node);
+                TreeNode node2(node);
                 node2.grid.moveDown(blankLoc);
                 node2.solution.addDirection(DOWN);// += 'd';
                 if(checkNode(node2, nodes, threshold)) {
@@ -207,7 +208,7 @@ void ida(Grid grid) noexcept {
             }
             if(node.grid.leftValid(blankLoc))
             {
-                QuarternaryTreeNode node2(node);
+                TreeNode node2(node);
                 node2.grid.moveLeft(blankLoc);
                 node2.solution.addDirection(LEFT);// += 'l';
                 if(checkNode(node2, nodes, threshold)) {
@@ -217,7 +218,7 @@ void ida(Grid grid) noexcept {
             }
             if(node.grid.rightValid(blankLoc))
             {
-                QuarternaryTreeNode node2(node);
+                TreeNode node2(node);
                 node2.grid.moveRight(blankLoc);
                 node2.solution.addDirection(RIGHT);// += 'r';
                 if(checkNode(node2, nodes, threshold)) {
@@ -369,7 +370,10 @@ void numberphile() {
 
 int main() {
     BackwardsSolver solver;
-    solver.findRedundant(10);
+    std::unordered_set<std::string> redundant = solver.findRedundant(10);
+    FSM fsm;
+    std::vector<State> fsmvec = fsm.generateFSM(redundant);
+    cout << fsmvec.size() << endl;
     /*Grid grid;
     array<int, 16> numbers = { 1,  2,  3,  4,
                               5,  6,  7,  8,

@@ -53,6 +53,28 @@ TEST(quarternary_tree, test_id3) {
     EXPECT_EQ(3, tree.getHead()->r->id);
 }
 
+TEST(quarternary_tree, test_superceeded_start) {
+    QuarternaryTree tree;
+    tree.addString("ud");
+    tree.addString("du");
+    EXPECT_TRUE(tree.superceeded("udlr"));
+    EXPECT_FALSE(tree.superceeded("uldr"));
+}
+
+TEST(quarternary_tree, test_superceeded_middle) {
+    QuarternaryTree tree;
+    tree.addString("ud");
+    tree.addString("du");
+    EXPECT_TRUE(tree.superceeded("rudlr"));
+}
+
+TEST(quarternary_tree, test_superceeded_end) {
+    QuarternaryTree tree;
+    tree.addString("ud");
+    tree.addString("du");
+    EXPECT_TRUE(tree.superceeded("dlrud"));
+}
+
 TEST(tree_traversal, test_simple_tree_move) {
     QuarternaryTree tree;
     tree.addString("u");

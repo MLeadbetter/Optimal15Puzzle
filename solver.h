@@ -7,6 +7,7 @@
 #include <unordered_set>
 
 #include "grid.h"
+#include "quarternarytree.h"
 
 class BackwardsSolver {
 public:
@@ -33,6 +34,7 @@ public:
 
     std::unordered_set<std::string> findRedundant(unsigned int movesFromEnd) {
         std::unordered_set<std::string> redundant;
+        QuarternaryTree tree;
         for(unsigned int i = 0; i < 16; i++) {
             std::cout << "0 at " << i << std::endl;
             std::array<int, 16> solved = { 1,  2,  3,  4,
@@ -40,13 +42,13 @@ public:
                                            9, 10, 11, 12,
                                           13, 14, 15,  0};
             std::swap(solved[i], solved[15]);
-            findRedundant(movesFromEnd, solved, redundant);
+            findRedundant(movesFromEnd, solved, redundant, tree);
         }
         return redundant;
     }
 
 private:
-    void findRedundant(unsigned int movesFromEnd, std::array<int, 16> solved, std::unordered_set<std::string> &redundant) {
+    void findRedundant(unsigned int movesFromEnd, std::array<int, 16> solved, std::unordered_set<std::string> &redundant, QuarternaryTree &tree) {
         Grid grid;
         grid.set(solved);
         std::unordered_map<uint64_t, std::string> seen;
@@ -55,7 +57,7 @@ private:
         moveFrom[grid.getGrid()] = std::string("");
         unsigned int prev = 0;
         for(unsigned int i = 0; i < movesFromEnd; i++) {
-            std::unordered_map<uint64_t, std::string> solutions = recordRedundant(moveFrom, seen, redundant);
+            std::unordered_map<uint64_t, std::string> solutions = recordRedundant(moveFrom, seen, redundant, tree);
             seen.insert(solutions.begin(), solutions.end());
             moveFrom = solutions;
             std::cout << i+1 << ": " << redundant.size()-prev << " no-nos" << std::endl;
@@ -103,7 +105,7 @@ private:
         return solutions;
     }
 
-    std::unordered_map<uint64_t, std::string> recordRedundant(std::unordered_map<uint64_t, std::string> &moveFrom, std::unordered_map<uint64_t, std::string> &seen, std::unordered_set<std::string> &redundant) {
+    std::unordered_map<uint64_t, std::string> recordRedundant(std::unordered_map<uint64_t, std::string> &moveFrom, std::unordered_map<uint64_t, std::string> &seen, std::unordered_set<std::string> &redundant, QuarternaryTree &tree) {
         std::unordered_map<uint64_t, std::string> solutions;
         for(auto &it : moveFrom)
         {
@@ -116,7 +118,10 @@ private:
                 grid2.moveUp(blankLoc);
                 if(!seen.contains(grid2.getGrid()))
                     solutions[grid2.getGrid()] = solution + 'u';
-                else if(!superceeded(solution + 'u', redundant)) redundant.insert(solution + 'u');
+                else if(!tree.superceeded(solution + 'u')) {
+                    redundant.insert(solution + 'u');
+                    tree.addString(solution + 'u');
+                }
             }
             if(grid.downValid(blankLoc))
             {
@@ -124,7 +129,10 @@ private:
                 grid2.moveDown(blankLoc);
                 if(!seen.contains(grid2.getGrid()))
                     solutions[grid2.getGrid()] = solution + 'd';
-                else if(!superceeded(solution + 'd', redundant)) redundant.insert(solution + 'd');
+                else if(!tree.superceeded(solution + 'd')) {
+                    redundant.insert(solution + 'd');
+                    tree.addString(solution + 'd');
+                }
             }
             if(grid.leftValid(blankLoc))
             {
@@ -132,7 +140,10 @@ private:
                 grid2.moveLeft(blankLoc);
                 if(!seen.contains(grid2.getGrid()))
                     solutions[grid2.getGrid()] = solution + 'l';
-                else if(!superceeded(solution + 'l', redundant)) redundant.insert(solution + 'l');
+                else if(!tree.superceeded(solution + 'l')) {
+                    redundant.insert(solution + 'l');
+                    tree.addString(solution + 'l');
+                }
             }
             if(grid.rightValid(blankLoc))
             {
@@ -140,18 +151,13 @@ private:
                 grid2.moveRight(blankLoc);
                 if(!seen.contains(grid2.getGrid()))
                     solutions[grid2.getGrid()] = solution + 'r';
-                else if(!superceeded(solution + 'r', redundant)) redundant.insert(solution + 'r');
+                else if(!tree.superceeded(solution + 'r')) {
+                    redundant.insert(solution + 'r');
+                    tree.addString(solution + 'r');
+                }
             }
         }
         return solutions;
-    }
-
-    bool superceeded(std::string candidate, std::unordered_set<std::string> &redundant) {
-        for(const std::string &comp : redundant) {
-            if(candidate.find(comp) != std::string::npos)
-                return true;
-        }
-        return false;
     }
 };
 

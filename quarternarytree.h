@@ -7,11 +7,45 @@
 #include <array>
 #include <cmath>
 
+template<class T>
+class CircularQueue {
+public:
+    CircularQueue() {
+        data = new T[size]{0};
+    }
+
+    ~CircularQueue() {
+        delete[] data;
+    }
+
+    void reinit() noexcept {
+        delete[] data;
+        data = new T[size]{0};
+    }
+
+    void addStartPopEnd(T val) noexcept {
+        pos = (pos+1) % size;
+        data[pos] = val;
+    }
+
+    T* getRaw() const noexcept {
+        return data;
+    }
+
+    T operator [](unsigned int index) const noexcept {return data[(pos+index)%size];}
+    T &operator [](unsigned int index) noexcept {return data[(pos+index)%size];}
+
+private:
+    T* data;
+    unsigned int pos = 0;
+    unsigned int size = 0;
+};
+
 struct QuarternaryTreeNode {
-    std::shared_ptr<QuarternaryTreeNode> u = 0;
-    std::shared_ptr<QuarternaryTreeNode> d = 0;
-    std::shared_ptr<QuarternaryTreeNode> l = 0;
-    std::shared_ptr<QuarternaryTreeNode> r = 0;
+    QuarternaryTreeNode* u = 0;
+    QuarternaryTreeNode* d = 0;
+    QuarternaryTreeNode* l = 0;
+    QuarternaryTreeNode* r = 0;
     bool isParent = false;
     unsigned int id = 0;
 };
@@ -30,38 +64,67 @@ public:
             switch(c) {
             case 'u':
                 if(current->u == 0) {
-                    current->u = std::make_shared<QuarternaryTreeNode>();
+                    current->u = new QuarternaryTreeNode();
                     current->u->id = currentId;
                     currentId++;
                 }
-                current = current->u.get();
+                current = current->u;
                 break;
             case 'd':
                 if(current->d == 0) {
-                    current->d = std::make_shared<QuarternaryTreeNode>();
+                    current->d = new QuarternaryTreeNode();
                     current->d->id = currentId;
                     currentId++;
                 }
-                current = current->d.get();
+                current = current->d;
                 break;
             case 'r':
                 if(current->r == 0) {
-                    current->r = std::make_shared<QuarternaryTreeNode>();
+                    current->r = new QuarternaryTreeNode();
                     current->r->id = currentId;
                     currentId++;
                 }
-                current = current->r.get();
+                current = current->r;
                 break;
             case 'l':
                 if(current->l == 0) {
-                    current->l = std::make_shared<QuarternaryTreeNode>();
+                    current->l = new QuarternaryTreeNode();
                     current->l->id = currentId;
                     currentId++;
                 }
-                current = current->l.get();
+                current = current->l;
                 break;
             }
         }
+    }
+
+    bool superceeded(std::string s) {
+        for(unsigned int i = 0; i < s.length()-1; i++) {
+            QuarternaryTreeNode* current = &head;
+            for(unsigned int j = i; j < s.length(); j++) {
+                switch(s[j]) {
+                case 'u':
+                    if(current->u) current = current->u;
+                    else goto next;
+                    break;
+                case 'd':
+                    if(current->d) current = current->d;
+                    else goto next;
+                    break;
+                case 'l':
+                    if(current->l) current = current->l;
+                    else goto next;
+                    break;
+                case 'r':
+                    if(current->r) current = current->r;
+                    else goto next;
+                    break;
+                }
+                if(current->isParent == false) return true;
+            }
+        next:;
+        }
+        return false;
     }
 
     QuarternaryTreeNode* getHead() {
@@ -72,8 +135,6 @@ public:
         return maxDepth;
     }
 };
-
-#include <iostream>
 
 struct TreeTraversalNode {
 public:
@@ -162,28 +223,28 @@ public:
     }
 
     bool upValid() const noexcept {
-        for(const std::shared_ptr<QuarternaryTreeNode> &s : state) {
+        for(QuarternaryTreeNode* const s : state) {
             if(s != 0 && s->u != 0 && !s->u->isParent) return false;
         }
         return true;
     }
 
     bool downValid() const noexcept {
-        for(const std::shared_ptr<QuarternaryTreeNode> &s : state) {
+        for(QuarternaryTreeNode* const s : state) {
             if(s != 0 && s->d != 0 && !s->d->isParent) return false;
         }
         return true;
     }
 
     bool leftValid() const noexcept {
-        for(const std::shared_ptr<QuarternaryTreeNode> &s : state) {
+        for(QuarternaryTreeNode* const s : state) {
             if(s != 0 && s->l != 0 && !s->l->isParent) return false;
         }
         return true;
     }
 
     bool rightValid() const noexcept {
-        for(const std::shared_ptr<QuarternaryTreeNode> &s : state) {
+        for(QuarternaryTreeNode* const s : state) {
             if(s != 0 && s->r != 0 && !s->r->isParent) return false;
         }
         return true;
@@ -235,7 +296,7 @@ public:
     int id;
 
 private:
-    std::deque<std::shared_ptr<QuarternaryTreeNode>> state;
+    std::deque<QuarternaryTreeNode*> state;
     QuarternaryTree *tree;
 };
 
