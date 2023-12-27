@@ -302,6 +302,7 @@ public:
             if(state[i] != 0)
                 h *= ipow(primes[i+p], state[i]->id);
         }
+        //return h >> 1;
         return h;
     }
 
@@ -362,16 +363,17 @@ public:
     }
 
     bool equal(HashNode &node, TreeTraversalNode *value, uint64_t hash) const noexcept {
-        return node.populated && node.hash == hash && value->equals(node.key);
+        return node.populated && /*node.hash == hash &&*/ value->equals(node.key);
     }
 
     bool contains(TreeTraversalNode *value) const noexcept {
-        uint64_t h = hash1(value) & mask;
-        if(equal(table1[h], value, h)) return true;
+        uint64_t h1 = hash1(value);
+        uint64_t h = h1 & mask;
+        if(equal(table1[h], value, h1)) return true;
         h = hash2(value) & mask;
-        if(equal(table2[h], value, h)) return true;
+        if(equal(table2[h], value, h1)) return true;
         h = hash3(value) & mask;
-        if(equal(table3[h], value, h)) return true;
+        if(equal(table3[h], value, h1)) return true;
         return false;
     }
 
@@ -379,12 +381,13 @@ public:
     //uint64_t &operator [](uint64_t key) {return registers[i];}
 
     uint64_t get(TreeTraversalNode *key) const noexcept {
-        uint64_t h = hash1(key) & mask;
-        if(equal(table1[h], key, h)) return table1[h].value;
+        uint64_t h1 = hash1(key);
+        uint64_t h = h1 & mask;
+        if(equal(table1[h], key, h1)) return table1[h].value;
         h = hash2(key) & mask;
-        if(equal(table2[h], key, h)) return table2[h].value;
+        if(equal(table2[h], key, h1)) return table2[h].value;
         h = hash3(key) & mask;
-        if(equal(table3[h], key, h)) return table3[h].value;
+        if(equal(table3[h], key, h1)) return table3[h].value;
         return 0;
     }
 
@@ -430,23 +433,26 @@ private:
 
     // Returns 0 on success, and 1 on failure
     bool insert(HashNode value, int attempts) noexcept {
-        uint64_t h = hash1(value.key);
+        uint64_t h1 = hash1(value.key);
+        uint64_t h = h1;
         uint64_t loc = h & mask;
         if(!table1[loc].populated) {
             table1[loc] = value;
-            table1[loc].hash = loc;
+            table1[loc].hash = h1;
         } else {
             std::swap(table1[loc], value);
             h = hash2(value.key);
             loc = h & mask;
             if(!table2[loc].populated) {
                 table2[loc] = value;
+                table2[loc].hash = h1;
             } else {
                 std::swap(table2[loc], value);
                 h = hash3(value.key);
                 loc = h & mask;
                 if(!table3[loc].populated) {
                     table3[loc] = value;
+                    table3[loc].hash = h1;
                 } else {
                     std::swap(table3[loc], value);
                     if(attempts > 10)

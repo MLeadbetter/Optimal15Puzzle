@@ -205,6 +205,41 @@ TEST(traversal_hash_map, test_resize) {
     EXPECT_EQ(6, hashmap.get(traversal));
 }
 
+TEST(traversal_hash_map, test_resize2) {
+    QuarternaryTree tree;
+    string s;
+    int len = 12;
+    for(int i = 0; i < len; i++) s += "u";
+    tree.addString(s);
+    TraversalHashMap hashmap(2);
+    TreeTraversalNode* traversal;
+    for(int i = 0; i < len; i++) {
+        traversal = new TreeTraversalNode(&tree);
+        for(int j = 0; j < i+1; j++) traversal->moveUp();
+        hashmap.insert(traversal, i);
+        cout << traversal->hash(0) << " at " << i << endl;
+    }
+    cout << traversal->hash(0) << endl;
+    EXPECT_EQ(len-1, hashmap.get(traversal));
+}
+
+/*
+TEST(traversal_hash_map, test_hash_collisions) {
+    QuarternaryTree tree;
+    string s;
+    int len = 12;
+    for(int i = 0; i < len; i++) s += "u";
+    tree.addString(s);
+    TraversalHashMap hashmap(2);
+    TreeTraversalNode* traversal;
+    for(int i = 0; i < len; i++) {
+        traversal = new TreeTraversalNode(&tree);
+        for(int j = 0; j < i+1; j++) traversal->moveUp();
+        hashmap.insert(traversal, i);
+    }
+    EXPECT_LE(hashmap.capacity(), len*3);
+}*/
+
 TEST(circular_queue, test_in_out) {
     CircularQueue queue(2);
     QuarternaryTreeNode* n1 = new QuarternaryTreeNode;
