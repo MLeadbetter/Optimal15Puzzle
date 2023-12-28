@@ -80,7 +80,7 @@ TEST(tree_traversal, test_simple_tree_move) {
     tree.addString("u");
     TreeTraversalNode traversal(&tree);
     traversal.moveUp();
-    EXPECT_EQ(3, traversal.hash(0));
+    EXPECT_EQ(1, traversal.hash(0));
 }
 
 TEST(tree_traversal, test_simple_tree_hash) {
@@ -88,7 +88,7 @@ TEST(tree_traversal, test_simple_tree_hash) {
     tree.addString("u");
     TreeTraversalNode traversal(&tree);
     traversal.moveUp();
-    EXPECT_EQ(5, traversal.hash(1));
+    EXPECT_EQ(2, traversal.hash(1));
 }
 
 TEST(tree_traversal, test_compound) {
@@ -97,7 +97,7 @@ TEST(tree_traversal, test_compound) {
     TreeTraversalNode traversal(&tree);
     traversal.moveUp();
     traversal.moveUp();
-    EXPECT_EQ(75, traversal.hash(0));
+    EXPECT_EQ(37, traversal.hash(0));
 }
 
 TEST(tree_traversal, test_expire_node) {
@@ -107,7 +107,7 @@ TEST(tree_traversal, test_expire_node) {
     TreeTraversalNode traversal(&tree);
     traversal.moveUp();
     traversal.moveRight();
-    EXPECT_EQ(25, traversal.hash(0));
+    EXPECT_EQ(12, traversal.hash(0));
 }
 
 TEST(tree_traversal, test_equal) {
@@ -217,9 +217,7 @@ TEST(traversal_hash_map, test_resize2) {
         traversal = new TreeTraversalNode(&tree);
         for(int j = 0; j < i+1; j++) traversal->moveUp();
         hashmap.insert(traversal, i);
-        cout << traversal->hash(0) << " at " << i << endl;
     }
-    cout << traversal->hash(0) << endl;
     EXPECT_EQ(len-1, hashmap.get(traversal));
 }
 
@@ -275,7 +273,6 @@ TEST(circular_queue, test_pop_end) {
     queue.addStartPopEnd(n1);
     queue.addStartPopEnd(n2);
     queue.addStartPopEnd(n3);
-    cout << queue[0] << ", " << queue[1] << endl;
     EXPECT_EQ(3, queue[0]->id);
     EXPECT_EQ(2, queue[1]->id);
 }

@@ -302,11 +302,10 @@ public:
             if(state[i] != 0)
                 h *= ipow(primes[i+p], state[i]->id);
         }
-        //return h >> 1;
-        return h;
+        return h >> 1;
     }
 
-    bool equals(const TreeTraversalNode *b) const noexcept {
+    bool equals(const TreeTraversalNode* const b) const noexcept {
         if(b == 0) return false;
         for(unsigned int i = 0; i < state.size(); i++) {
             if(state[i] != b->state[i]) return false;
@@ -335,7 +334,7 @@ private:
 struct HashNode {
     bool populated = false;
     uint64_t hash = 0;
-    TreeTraversalNode *key;
+    const TreeTraversalNode* key;
     uint64_t value;
 };
 #include <iostream>
@@ -362,12 +361,12 @@ public:
         delete[] table3;
     }
 
-    bool equal(HashNode &node, TreeTraversalNode *value, uint64_t hash) const noexcept {
-        return node.populated && /*node.hash == hash &&*/ value->equals(node.key);
+    bool equal(const HashNode &node, const TreeTraversalNode* const value, const uint64_t hash) const noexcept {
+        return node.populated && node.hash == hash && value->equals(node.key);
     }
 
-    bool contains(TreeTraversalNode *value) const noexcept {
-        uint64_t h1 = hash1(value);
+    bool contains(const TreeTraversalNode* const value) const noexcept {
+        const uint64_t h1 = hash1(value);
         uint64_t h = h1 & mask;
         if(equal(table1[h], value, h1)) return true;
         h = hash2(value) & mask;
@@ -377,11 +376,11 @@ public:
         return false;
     }
 
-    uint64_t operator [](TreeTraversalNode *key) const {return get(key);}
+    uint64_t operator [](const TreeTraversalNode* const key) const {return get(key);}
     //uint64_t &operator [](uint64_t key) {return registers[i];}
 
-    uint64_t get(TreeTraversalNode *key) const noexcept {
-        uint64_t h1 = hash1(key);
+    uint64_t get(const TreeTraversalNode* const key) const noexcept {
+        const uint64_t h1 = hash1(key);
         uint64_t h = h1 & mask;
         if(equal(table1[h], key, h1)) return table1[h].value;
         h = hash2(key) & mask;
@@ -391,15 +390,15 @@ public:
         return 0;
     }
 
-    void insert(TreeTraversalNode* key, uint64_t value) noexcept {
+    void insert(const TreeTraversalNode* const key, const uint64_t value) noexcept {
         HashNode node;
         node.key = key;
         node.value = value;
         node.populated = true;
-        uint64_t failed = insert(node, 0);
-        if(failed) {
+        std::pair<bool, HashNode> result = insert(node, 0);
+        if(result.first) {
             doubleTable();
-            insert(key, value);
+            insert(result.second, 0);
         }
         elements++;
     }
@@ -420,7 +419,7 @@ private:
         table1 = new HashNode[size];
         table2 = new HashNode[size];
         table3 = new HashNode[size];
-        for(unsigned int i = 0; i < size/2; i+=2) {
+        for(unsigned int i = 0; i < size/2; i++) {
             if(tempTable1[i].populated) insert(tempTable1[i], 0);
             if(tempTable2[i].populated) insert(tempTable2[i], 0);
             if(tempTable3[i].populated) insert(tempTable3[i], 0);
@@ -432,47 +431,45 @@ private:
     }
 
     // Returns 0 on success, and 1 on failure
-    bool insert(HashNode value, int attempts) noexcept {
-        uint64_t h1 = hash1(value.key);
+    std::pair<bool, HashNode> insert(HashNode value, const int attempts) noexcept {
+        const uint64_t h1 = hash1(value.key);
+        value.hash = h1;
         uint64_t h = h1;
         uint64_t loc = h & mask;
         if(!table1[loc].populated) {
             table1[loc] = value;
-            table1[loc].hash = h1;
         } else {
             std::swap(table1[loc], value);
             h = hash2(value.key);
             loc = h & mask;
             if(!table2[loc].populated) {
                 table2[loc] = value;
-                table2[loc].hash = h1;
             } else {
                 std::swap(table2[loc], value);
                 h = hash3(value.key);
                 loc = h & mask;
                 if(!table3[loc].populated) {
                     table3[loc] = value;
-                    table3[loc].hash = h1;
                 } else {
                     std::swap(table3[loc], value);
                     if(attempts > 10)
-                        return 1;
+                        return std::make_pair(true, value);
                     return insert(value, attempts+1);
                 }
             }
         }
-        return 0;
+        return std::make_pair(false, value);
     }
 
-    uint64_t hash1(const TreeTraversalNode *value) const noexcept {
+    uint64_t hash1(const TreeTraversalNode* const value) const noexcept {
         return value->hash(0);
     }
 
-    uint64_t hash2(const TreeTraversalNode *value) const noexcept {
+    uint64_t hash2(const TreeTraversalNode* const value) const noexcept {
         return value->hash(20);
     }
 
-    uint64_t hash3(const TreeTraversalNode *value) const noexcept {
+    uint64_t hash3(const TreeTraversalNode* const value) const noexcept {
         return value->hash(40);
     }
 
