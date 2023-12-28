@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include <algorithm>
+#include <fstream>
 
 #include "simplified_solver.h"
 #include "grid_converter.h"
@@ -14,7 +15,7 @@ class LowerBoundTables {
 public:
 
     LowerBoundTables() {
-        generateTables();
+        //generateTables();
     }
 
     unsigned int lower_bound(uint64_t tileLocations) {
@@ -32,9 +33,46 @@ public:
         populateTable(3, {1,  5,  9,  13});
         populateTable(4, {2,  6,  10, 14});
         populateTable(5, {3,  7,  11, 15});
-        /*populateTable(6, {11, 12, 13, 14, 15});
+        populateTable(6, {11, 12, 13, 14, 15});
         populateTable(7, {4,  8,  11, 12, 15});
-        populateTable(8, {4,  8,  11, 13, 14, 15});*/
+        populateTable(8, {4,  8,  12, 13, 14, 15});
+    }
+
+    void saveTables() {
+        for(unsigned int i = 0; i < 9; i++) {
+            std::ofstream ofs;
+            ofs.open(std::string("table") + std::to_string(i), std::ios::binary);
+            for(std::pair<const uint64_t, unsigned int> &d : tables[i]) {
+                uint64_t first = d.first;
+                ofs.write(reinterpret_cast<char*>(&first), sizeof(first));
+                ofs.write(reinterpret_cast<char*>(&d.second), sizeof(d.second));
+            }
+            ofs.close();
+        }
+    }
+
+    void loadTables() {
+        masks[0] = createMask({1,  2,  3,  4});
+        masks[1] = createMask({5,  6,  7,  8});
+        masks[2] = createMask({9,  10, 11, 12});
+        masks[3] = createMask({1,  5,  9,  13});
+        masks[4] = createMask({2,  6,  10, 14});
+        masks[5] = createMask({3,  7,  11, 15});
+        masks[6] = createMask({11, 12, 13, 14, 15});
+        masks[7] = createMask({4,  8,  11, 12, 15});
+        masks[8] = createMask({4,  8,  12, 13, 14, 15});
+        for(unsigned int i = 0; i < 9; i++) {
+            std::ifstream ifs;
+            ifs.open(std::string("table") + std::to_string(i), std::ios::binary);
+            while(!ifs.eof()) {
+                uint64_t first;
+                ifs.read(reinterpret_cast<char*>(&first), sizeof(first));
+                unsigned int second;
+                ifs.read(reinterpret_cast<char*>(&second), sizeof(second));
+                tables[i][first] = second;
+            }
+            ifs.close();
+        }
     }
 
 private:

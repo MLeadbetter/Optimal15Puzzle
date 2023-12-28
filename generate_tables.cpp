@@ -2,6 +2,7 @@
 
 #include "solver.h"
 #include "fsm.h"
+#include "lower_bound_tables.h"
 
 using namespace std;
 
@@ -10,6 +11,9 @@ int main(int argc, char* argv[]) {
         cerr << "Usage: generate_tables <depth>" << endl;
         return 1;
     }
+    LowerBoundTables lbt;
+    lbt.generateTables();
+    lbt.saveTables();
     unsigned int depth = atoi(argv[1]);
     BackwardsSolver solver;
     std::unordered_set<std::string> redundant = solver.findRedundant(depth);

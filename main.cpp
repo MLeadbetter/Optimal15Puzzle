@@ -238,43 +238,9 @@ void numberphile() {
     ida(grid);
 }
 
-#include <chrono>
-
 
 int main() {
-    /*BackwardsSolver solver;
-    std::unordered_set<std::string> redundant = solver.findRedundant(10);
-    FSM fsm;
-    std::vector<State> fsmvec = fsm.generateFSM(redundant);
-    cout << fsmvec.size() << endl;*/
-    /*Grid grid;
-    array<int, 16> numbers = { 1,  2,  3,  4,
-                              5,  6,  7,  8,
-                              9, 10, 11, 12,
-                              13, 14, 15,  0};
-    auto start_time = std::chrono::high_resolution_clock::now();
-
-    volatile int a = 0;
-    for(unsigned int i = 0; i < 100000000; i++) {
-        grid.set(numbers);
-        grid.set(numbers);
-        grid.set(numbers);
-        grid.set(numbers);
-        a += i;
-    }
-    cout << a << endl;
-
-    auto end_time = std::chrono::high_resolution_clock::now();
-
-    // Calculate the duration in milliseconds
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-    // Output the result
-    std::cout << "Time taken: " << duration.count() << " milliseconds" << std::endl;
-
-
-    return 0;*/
-
+    lbt.loadTables();
     //solve_worst2();
     //solve_last_layers5();
     solve_sample1();

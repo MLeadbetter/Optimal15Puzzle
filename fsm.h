@@ -29,6 +29,7 @@ public:
             ofs.write(reinterpret_cast<char*>(&s.left), sizeof(s.left));
             ofs.write(reinterpret_cast<char*>(&s.right), sizeof(s.right));
         }
+        ofs.close();
     }
 
     std::vector<State> loadFSM(std::string fileName) {
@@ -43,6 +44,7 @@ public:
             ifs.read(reinterpret_cast<char*>(&s.right), sizeof(s.right));
             fsm.push_back(s);
         }
+        ifs.close();
         return fsm;
     }
 
