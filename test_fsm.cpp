@@ -15,7 +15,7 @@ TEST(fsm, test_num_states) {
     invalidStrings.insert("rl");
     invalidStrings.insert("lr");
     vector<State> states = fsm.generateFSM(invalidStrings);
-    EXPECT_EQ(4, states.size());
+    EXPECT_EQ(5, states.size());
 }
 
 TEST(fsm, test_num_states_longer) {
@@ -27,7 +27,7 @@ TEST(fsm, test_num_states_longer) {
     invalidStrings.insert("lr");
     invalidStrings.insert("uldruld");
     vector<State> states = fsm.generateFSM(invalidStrings);
-    EXPECT_EQ(9, states.size());
+    EXPECT_EQ(10, states.size());
 }
 
 TEST(fsm, test_num_states_longer2) {
@@ -40,5 +40,5 @@ TEST(fsm, test_num_states_longer2) {
     invalidStrings.insert("uldruld");
     invalidStrings.insert("druldru");
     vector<State> states = fsm.generateFSM(invalidStrings);
-    EXPECT_EQ(14, states.size());
+    EXPECT_EQ(15, states.size());
 }

@@ -16,8 +16,8 @@ FetchContent_MakeAvailable(googletest)
 
 
 # Configure project
-#set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -O3 -march=native -flto")
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -g")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -O3 -march=native -flto")
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -g")
 
 set(SHARED_SOURCES
     ${CMAKE_SOURCE_DIR}/grid.h

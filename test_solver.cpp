@@ -35,3 +35,15 @@ TEST(solver, test_solution_overwrite) {
     grid.set(unsolved);
     EXPECT_EQ("ll", solver.solveFromEnd(4)[grid.getGrid()]);
 }
+
+TEST(solver, test_redundant) {
+    BackwardsSolver solver;
+    auto redundant = solver.findRedundant(2);
+    EXPECT_EQ(4, redundant.size());
+}
+
+TEST(solver, test_redundant_superceeded) {
+    BackwardsSolver solver;
+    auto redundant = solver.findRedundant(4);
+    EXPECT_EQ(4, redundant.size());
+}

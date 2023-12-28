@@ -6,7 +6,9 @@
 #include <string>
 #include <stack>
 #include <vector>
-#include <quarternarytree.h>
+#include <fstream>
+
+#include "quarternarytree.h"
 
 struct State {
     int up = -1;
@@ -18,6 +20,32 @@ struct State {
 
 class FSM {
 public:
+    void saveFSM(std::string fileName, std::vector<State> fsm) {
+        std::ofstream ofs;
+        ofs.open(fileName, std::ios::app | std::ios::binary);
+        for(State &s : fsm) {
+            ofs.write(reinterpret_cast<char*>(&s.up), sizeof(s.up));
+            ofs.write(reinterpret_cast<char*>(&s.down), sizeof(s.down));
+            ofs.write(reinterpret_cast<char*>(&s.left), sizeof(s.left));
+            ofs.write(reinterpret_cast<char*>(&s.right), sizeof(s.right));
+        }
+    }
+
+    std::vector<State> loadFSM(std::string fileName) {
+        std::vector<State> fsm;
+        std::ifstream ifs;
+        ifs.open(fileName, std::ios::binary);
+        while(!ifs.eof()) {
+            State s;
+            ifs.read(reinterpret_cast<char*>(&s.up), sizeof(s.up));
+            ifs.read(reinterpret_cast<char*>(&s.down), sizeof(s.down));
+            ifs.read(reinterpret_cast<char*>(&s.left), sizeof(s.left));
+            ifs.read(reinterpret_cast<char*>(&s.right), sizeof(s.right));
+            fsm.push_back(s);
+        }
+        return fsm;
+    }
+
     std::vector<State> generateFSM(std::unordered_set<std::string> &redundant) noexcept {
         // Create 4-ary tree from strings
         // A slow way of using this would be to create a new traversal at the bottom of the tree every move
@@ -45,30 +73,11 @@ public:
         TraversalHashMap hashMap;
         std::stack<TreeTraversalNode*> nodes;
         TreeTraversalNode* traversal = new TreeTraversalNode(&tree);
-        traversal->moveUp();
         traversal->id = traversalId;
         hashMap.insert(traversal, traversal->id);
         traversalId++;
         nodes.push(traversal);
-        traversal = new TreeTraversalNode(&tree);
-        traversal->moveDown();
-        traversal->id = traversalId;
-        traversalId++;
-        hashMap.insert(traversal, traversal->id);
-        nodes.push(traversal);
-        traversal = new TreeTraversalNode(&tree);
-        traversal->moveLeft();
-        traversal->id = traversalId;
-        traversalId++;
-        hashMap.insert(traversal, traversal->id);
-        nodes.push(traversal);
-        traversal = new TreeTraversalNode(&tree);
-        traversal->moveRight();
-        traversal->id = traversalId;
-        traversalId++;
-        hashMap.insert(traversal, traversal->id);
-        nodes.push(traversal);
-        fsm.resize(4);
+        fsm.resize(1);
         while(!nodes.empty()) {
             TreeTraversalNode* toExpand = nodes.top();
             nodes.pop();

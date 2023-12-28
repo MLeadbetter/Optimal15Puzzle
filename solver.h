@@ -35,15 +35,18 @@ public:
     std::unordered_set<std::string> findRedundant(unsigned int movesFromEnd) {
         std::unordered_set<std::string> redundant;
         QuarternaryTree tree;
-        for(unsigned int i = 0; i < 16; i++) {
-            std::cout << "0 at " << i << std::endl;
-            std::array<int, 16> solved = { 1,  2,  3,  4,
-                                           5,  6,  7,  8,
-                                           9, 10, 11, 12,
-                                          13, 14, 15,  0};
-            std::swap(solved[i], solved[15]);
-            findRedundant(movesFromEnd, solved, redundant, tree);
+        for(unsigned int j = 2; j <= movesFromEnd; j++) {
+            for(unsigned int i = 0; i < 16; i++) {
+                std::cout << "0 at " << i << ", " << j << " moves deep" << std::endl;
+                std::array<int, 16> solved = { 1,  2,  3,  4,
+                                               5,  6,  7,  8,
+                                               9, 10, 11, 12,
+                                              13, 14, 15,  0};
+                std::swap(solved[i], solved[15]);
+                findRedundant(j, solved, redundant, tree);
+            }
         }
+        std::cout << redundant.size() << " duplicate strings found" << std::endl;
         return redundant;
     }
 
@@ -55,15 +58,15 @@ private:
         seen[grid.getGrid()] = std::string("");
         std::unordered_map<uint64_t, std::string> moveFrom;
         moveFrom[grid.getGrid()] = std::string("");
-        unsigned int prev = 0;
+        //unsigned int prev = 0;
         for(unsigned int i = 0; i < movesFromEnd; i++) {
             std::unordered_map<uint64_t, std::string> solutions = recordRedundant(moveFrom, seen, redundant, tree);
             seen.insert(solutions.begin(), solutions.end());
             moveFrom = solutions;
-            std::cout << i+1 << ": " << redundant.size()-prev << " no-nos" << std::endl;
-            prev = redundant.size();
+            //std::cout << i+1 << ": " << redundant.size()-prev << " no-nos" << std::endl;
+            //prev = redundant.size();
         }
-        std::cout << "Solved backwards for " << seen.size() << " positions." << std::endl;
+        //std::cout << "Solved backwards for " << seen.size() << " positions." << std::endl;
     }
 
     std::unordered_map<uint64_t, std::string> addMoves(std::unordered_map<uint64_t, std::string> &moveFrom, std::unordered_map<uint64_t, std::string> &seen) {

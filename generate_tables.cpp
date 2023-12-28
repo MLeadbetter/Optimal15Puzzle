@@ -15,5 +15,6 @@ int main(int argc, char* argv[]) {
     std::unordered_set<std::string> redundant = solver.findRedundant(depth);
     FSM fsm;
     std::vector<State> fsmvec = fsm.generateFSM(redundant);
-    cout << fsmvec.size() << endl;
+    fsm.saveFSM(string("fsm")+argv[1], fsmvec);
+    cout << fsmvec.size() << " states in genereated FSM" << endl;
 }
