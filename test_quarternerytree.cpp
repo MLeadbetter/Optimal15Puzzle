@@ -244,6 +244,7 @@ TEST(circular_queue, test_in_out) {
     n1->id = 1;
     queue.addStartPopEnd(n1);
     EXPECT_EQ(1, queue[0]->id);
+    delete n1;
 }
 
 #include <iostream>
@@ -257,6 +258,8 @@ TEST(circular_queue, test_in_out_twice) {
     queue.addStartPopEnd(n2);
     EXPECT_EQ(2, queue[0]->id);
     EXPECT_EQ(1, queue[1]->id);
+    delete n1;
+    delete n2;
 }
 
 TEST(circular_queue, test_pop_end) {
@@ -275,4 +278,7 @@ TEST(circular_queue, test_pop_end) {
     queue.addStartPopEnd(n3);
     EXPECT_EQ(3, queue[0]->id);
     EXPECT_EQ(2, queue[1]->id);
+    delete n1;
+    delete n2;
+    delete n3;
 }

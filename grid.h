@@ -28,6 +28,36 @@ public:
         return std::max(manhattan(), lbt.lower_bound(tileLocations));
     }
 
+
+    /* a^b
+     * 0 0 0
+     * 0 1 1
+     * 1 0 1
+     * 1 1 0
+     *
+     * ~(a^b)
+     * 0 0 1
+     * 0 1 0
+     * 1 0 0
+     * 1 1 1
+     *
+     * (~a)^b
+     * 0 0 1
+     * 0 1 0
+     * 1 0 0
+     * 1 1 1
+     */
+    unsigned int cornerHeuristic() const noexcept {
+        uint64_t correct = tileLocations ^ (~0x0123456789abcdef);
+        uint64_t incorrectCorners = (tileLocations & 0x0f00f00000000f00ULL) ^ 0x0100400000000d00ULL;
+        incorrectCorners |= incorrectCorners >> 1;
+        incorrectCorners |= incorrectCorners >> 2;
+        incorrectCorners |= incorrectCorners << 1;
+        incorrectCorners |= incorrectCorners << 2;
+        incorrectCorners &= 0x0f00f00000000f00ULL;
+        uint64_t correctAdjacent = ~((tileLocations & 0x00ff0f00ff0000f0ULL) ^ 0x00230500890000e0ULL);
+    }
+
     unsigned int manhattan() const noexcept {
         //return calculateManhattan4();
         return manhattanCost;

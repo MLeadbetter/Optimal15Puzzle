@@ -10,23 +10,25 @@
 
 #include "simplified_solver.h"
 #include "grid_converter.h"
+#include "uint64_hash_map.h"
+
+#define NUM_TABLES 9
 
 class LowerBoundTables {
 public:
 
-    LowerBoundTables() {
-        //generateTables();
-    }
-
     unsigned int lower_bound(uint64_t tileLocations) {
         unsigned int lb = 0;
-        for(unsigned int i = 0; i < tables.size(); i++) {
-            lb = std::max(lb, tables[i][tileLocations & masks[i]]);
+        for(unsigned int i = 0; i < NUM_TABLES; i++) {
+            lb = std::max(lb, tables[i].get(tileLocations & masks[i]));
         }
         return lb;
     }
 
     void generateTables() {
+        for(auto &table : tables) {
+            table = Uint64HashMap<unsigned int>(8);
+        }
         populateTable(0, {1,  2,  3,  4});
         populateTable(1, {5,  6,  7,  8});
         populateTable(2, {9,  10, 11, 12});
@@ -39,13 +41,14 @@ public:
     }
 
     void saveTables() {
-        for(unsigned int i = 0; i < 9; i++) {
+        for(unsigned int i = 0; i < NUM_TABLES; i++) {
             std::ofstream ofs;
             ofs.open(std::string("table") + std::to_string(i), std::ios::binary);
-            for(std::pair<const uint64_t, unsigned int> &d : tables[i]) {
-                uint64_t first = d.first;
-                ofs.write(reinterpret_cast<char*>(&first), sizeof(first));
-                ofs.write(reinterpret_cast<char*>(&d.second), sizeof(d.second));
+            uint64_t size = tables[i].size();
+            ofs.write(reinterpret_cast<char*>(&size), sizeof(size));
+            for(KeyValue<unsigned int> d : tables[i]) {
+                ofs.write(reinterpret_cast<char*>(&d.key), sizeof(d.key));
+                ofs.write(reinterpret_cast<char*>(&d.value), sizeof(d.value));
             }
             ofs.close();
         }
@@ -64,20 +67,24 @@ public:
         for(unsigned int i = 0; i < 9; i++) {
             std::ifstream ifs;
             ifs.open(std::string("table") + std::to_string(i), std::ios::binary);
+            uint64_t size;
+            ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+
+            tables[i] = Uint64HashMap<unsigned int>(64 - std::countl_zero(size / 3));
             while(!ifs.eof()) {
                 uint64_t first;
                 ifs.read(reinterpret_cast<char*>(&first), sizeof(first));
                 unsigned int second;
                 ifs.read(reinterpret_cast<char*>(&second), sizeof(second));
-                tables[i][first] = second;
+                tables[i].insert(first, second);
             }
             ifs.close();
         }
     }
 
 private:
-    std::array<std::unordered_map<uint64_t, unsigned int>, 9> tables;
-    std::array<uint64_t, 9> masks;
+    std::array<Uint64HashMap<unsigned int>, NUM_TABLES> tables;
+    std::array<uint64_t, NUM_TABLES> masks;
 
     unsigned int find_first_unused(const std::vector<unsigned int> &values) {
         for(unsigned int i = 1; i < 16; i++) {
@@ -111,7 +118,8 @@ private:
         masks[index] = createMask(values);
         std::unordered_map<uint64_t, unsigned int> initialSolve = bulkSolve(values);
         for(std::pair<uint64_t, unsigned int> solution : initialSolve) {
-            tables[index][gridToTileLocations(solution.first) & masks[index]] = solution.second;
+            uint64_t key = gridToTileLocations(solution.first) & masks[index];
+            if(!tables[index].contains(key)) tables[index].insert(key, solution.second);
         }
     }
 
@@ -139,5 +147,7 @@ private:
         std::cout << std::endl;
     }
 };
+
+#undef NUM_TABLES
 
 #endif // LOWER_BOUND_TABLES_H
