@@ -25,37 +25,29 @@ public:
     }
 
     int lower_bound() const noexcept {
-        return std::max(manhattan(), lbt.lower_bound(tileLocations));
+        return std::max(manhattan()+cornerHeuristic()+lastMoveHeuristic(), lbt.lower_bound(tileLocations));
     }
 
-
-    /* a^b
-     * 0 0 0
-     * 0 1 1
-     * 1 0 1
-     * 1 1 0
-     *
-     * ~(a^b)
-     * 0 0 1
-     * 0 1 0
-     * 1 0 0
-     * 1 1 1
-     *
-     * (~a)^b
-     * 0 0 1
-     * 0 1 0
-     * 1 0 0
-     * 1 1 1
-     */
     unsigned int cornerHeuristic() const noexcept {
-        uint64_t correct = tileLocations ^ (~0x0123456789abcdef);
-        uint64_t incorrectCorners = (tileLocations & 0x0f00f00000000f00ULL) ^ 0x0100400000000d00ULL;
-        incorrectCorners |= incorrectCorners >> 1;
-        incorrectCorners |= incorrectCorners >> 2;
-        incorrectCorners |= incorrectCorners << 1;
-        incorrectCorners |= incorrectCorners << 2;
-        incorrectCorners &= 0x0f00f00000000f00ULL;
-        uint64_t correctAdjacent = ~((tileLocations & 0x00ff0f00ff0000f0ULL) ^ 0x00230500890000e0ULL);
+        uint64_t correct = tileLocations ^ 0xedcba9876543210fULL;
+        correct |= (correct & 0xeeeeeeeeeeeeeeeeULL) >> 1;
+        correct |= (correct & 0xccccccccccccccccULL) >> 2;
+        correct |= (correct & 0x7777777777777777ULL) << 1;
+        correct |= (correct & 0x3333333333333333ULL) << 2;
+        uint64_t incorrectCorners = correct & 0x00f00000000f00f0ULL;
+        uint64_t correctAdjacent = (~correct) & (((incorrectCorners & 0x00000000000f00f0ULL) << 4*4) |
+                                                 ((incorrectCorners & 0x00f00000000000f0ULL) << 1*4) |
+                                                 ((incorrectCorners & 0x00f0000000000000ULL) >> 4*4) |
+                                                 ((incorrectCorners & 0x00000000000f0000ULL) >> 1*4));
+        return std::popcount(correctAdjacent) >> 1;
+    }
+
+    unsigned int lastMoveHeuristic() const noexcept {
+        // +2 if 15 not in right column AND 12 not on bottom row
+        uint64_t result = tileLocations ^ 0xc003000000000000ULL;
+        result |= result >> 1;
+        result &= result >> (4*3+2);
+        return (result >> (4*12-1)) & 0x2ULL;
     }
 
     unsigned int manhattan() const noexcept {
@@ -244,11 +236,6 @@ private:
         oneTwos |= (oneTwos & 0xaaaaaaaaaaaaaaaaULL) >> 1;
         return (most & oneTwos) | (0x5555555555555555ULL & ~oneTwos);
     }
-
-    constexpr static std::array<uint64_t, 16> xorlu = {0x0000000000000000ULL, 0x1111111111111111ULL, 0x2222222222222222ULL, 0x3333333333333333ULL,
-                                                       0x4444444444444444ULL, 0x5555555555555555ULL, 0x6666666666666666ULL, 0x7777777777777777ULL,
-                                                       0x8888888888888888ULL, 0x9999999999999999ULL, 0xaaaaaaaaaaaaaaaaULL, 0xbbbbbbbbbbbbbbbbULL,
-                                                       0xccccccccccccccccULL, 0xddddddddddddddddULL, 0xeeeeeeeeeeeeeeeeULL, 0xffffffffffffffffULL};
 
     void move(unsigned int blankLoc, unsigned int loc) noexcept {
         tileLocations &= 0xfffffffffffffff0ULL;

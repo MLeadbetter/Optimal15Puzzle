@@ -241,6 +241,7 @@ void numberphile() {
 
 int main() {
     lbt.loadTables();
+
     //solve_worst2();
     //solve_last_layers5();
     solve_sample1();

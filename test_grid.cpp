@@ -258,3 +258,74 @@ TEST_F(GridTestSample2, test_manhattan_move_left) {
     grid.moveLeft(grid.find(0));
     EXPECT_EQ(30, grid.manhattan());
 }
+
+TEST(GridCornerHeuristic, test_top_left) {
+    Grid grid;
+    array<int, 16> numbers = { 6,  2,  3,  4,
+                               5,  1,  7,  8,
+                               9, 10, 11, 12,
+                               13, 14, 15,  0};
+    grid.set(numbers);
+    EXPECT_EQ(4, grid.cornerHeuristic());
+}
+
+TEST(GridCornerHeuristic, test_top_right) {
+    Grid grid;
+    array<int, 16> numbers = { 1,  2,  3,  6,
+                               5,  4,  7,  8,
+                               9, 10, 11, 12,
+                              13, 14, 15,  0};
+    grid.set(numbers);
+    EXPECT_EQ(4, grid.cornerHeuristic());
+}
+
+TEST(GridCornerHeuristic, test_bottom_left) {
+    Grid grid;
+    array<int, 16> numbers = { 1,  2,  3,  4,
+                               5, 13,  7,  8,
+                               9, 10, 11, 12,
+                               6, 14, 15,  0};
+    grid.set(numbers);
+    EXPECT_EQ(4, grid.cornerHeuristic());
+}
+
+TEST(GridCornerHeuristic, test_last_move_neither) {
+    Grid grid;
+    array<int, 16> numbers = { 1,  2,  3,  4,
+                              15,  6, 12,  8,
+                               9, 10, 11,  7,
+                              13, 14,  5,  0};
+    grid.set(numbers);
+    EXPECT_EQ(2, grid.lastMoveHeuristic());
+}
+
+TEST(GridCornerHeuristic, test_last_move_only12) {
+    Grid grid;
+    array<int, 16> numbers = { 1,  2,  3,  4,
+                               5,  6,  7,  8,
+                               9, 10, 11,  0,
+                              13, 14, 15, 12};
+    grid.set(numbers);
+    EXPECT_EQ(0, grid.lastMoveHeuristic());
+}
+
+TEST(GridCornerHeuristic, test_last_move_only15) {
+    Grid grid;
+    array<int, 16> numbers = { 1,  2,  3,  4,
+                               5,  6,  7,  8,
+                               9, 10, 11, 12,
+                              13, 14,  0, 15};
+    grid.set(numbers);
+    EXPECT_EQ(0, grid.lastMoveHeuristic());
+}
+
+
+TEST(GridCornerHeuristic, test_last_move_both) {
+    Grid grid;
+    array<int, 16> numbers = { 1,  2,  3,  4,
+                               5,  6,  7,  8,
+                               9, 10, 11, 12,
+                              13, 14, 15,  0};
+    grid.set(numbers);
+    EXPECT_EQ(0, grid.lastMoveHeuristic());
+}
